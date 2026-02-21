@@ -69,7 +69,7 @@ export async function POST(req: Request) {
           ],
         },
       });
-      communityId = c?.id ?? null;
+      communityId = c?.id ?? undefined;
     }
     if (!communityId) {
       return NextResponse.json(
