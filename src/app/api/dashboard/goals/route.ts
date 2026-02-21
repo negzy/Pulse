@@ -65,7 +65,7 @@ async function computeStreak(
     string,
     { posts: number; comments: number; likes: number }
   >();
-  for (const [key, val] of byDayCommunity) {
+  for (const [key, val] of Array.from(byDayCommunity)) {
     const day = key.split("|")[0];
     const cur = byDay.get(day) ?? { posts: 0, comments: 0, likes: 0 };
     cur.posts += val.posts;
