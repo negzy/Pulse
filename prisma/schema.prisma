@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String           @id @default(cuid())
+  email          String           @unique
+  password       String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  communities    Community[]
+  extensionToken ExtensionToken?
+  dailyGoal      DailyGoal?
+}
+
+model DailyGoal {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goalLikes    Int      @default(0)
+  goalComments Int     @default(0)
+  goalPosts   Int      @default(0)
+  updatedAt   DateTime @updatedAt
+}
+
+model ExtensionToken {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   // hashed token for validation
+  createdAt DateTime @default(now())
+}
+
+model Community {
+  id               String    @id @default(cuid())
+  name             String
+  skoolUrl         String?
+  timezone         String    @default("UTC")
+  planType         String    @default("Free") // Free | Paid
+  hasTiers         Boolean   @default(false)
+  skoolSessionId         String?   // SkoolAPI.com session ID when connected
+  skoolGroupSlug         String?   // Skool group slug for webhooks (e.g. from skool.com/group/slug)
+  skoolConnectedAt       DateTime?
+  skoolEmail             String?   // Skool login email (for scrape using their account)
+  skoolPasswordEncrypted String?   // Encrypted; used for Scrape now so they don't re-enter
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weeklyPulses     WeeklyPulse[]
+  churnEvents      ChurnEvent[]
+  weeklyMetrics    WeeklyMetric[]
+}
+
+model WeeklyMetric {
+  id             String     @id @default(cuid())
+  communityId    String
+  community      Community  @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  periodStart    DateTime   // week or month start
+  periodEnd      DateTime
+  newMembers     Int        @default(0)
+  totalMembers   Int        @default(0)
+  postsCreated   Int        @default(0)
+  commentsCreated Int       @default(0)
+  likesCount     Int        @default(0)
+  interactionsCount Int     @default(0)  // likes + comments + reactions, or Skool "interactions"
+  activeMembers  Int        @default(0)
+  churnedMembers Int        @default(0)
+  startingPaidMembers Int?  // for churn rate calc
+  upgradeConversions Int    @default(0)
+  costPerJoin   Float?
+  callsBooked   Int        @default(0)
+  revenue       Float?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  @@index([communityId, periodStart])
+}
+
+model WeeklyPulse {
+  id                String    @id @default(cuid())
+  communityId       String
+  community         Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  weekStart         DateTime
+  newMembers        Int       @default(0)
+  churnedMembers    Int       @default(0)
+  posts             Int       @default(0)
+  comments          Int       @default(0)
+  notableWins       String?
+  topQuestions      String?
+  testNextWeek      String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  @@index([communityId, weekStart])
+}
+
+model ChurnEvent {
+  id          String    @id @default(cuid())
+  communityId String
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  memberIdOrName String
+  status      String    @default("churned") // active | churned
+  startDate   DateTime?
+  churnDate   DateTime
+  churnReason String?   // too_busy, not_seeing_value, price, didnt_use, joined_for_one_thing, other
+  notes       String?
+  plan        String?   // free | premium | vip
+  source      String?   // ads | referral | organic
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  @@index([communityId, churnDate])
+  @@index([communityId, status])
+}

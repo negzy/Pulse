@@ -1,0 +1,2 @@
+member_id_or_name,status,start_date,churn_date,churn_reason,notes,plan,source
+Jane Doe,churned,2024-01-15,2024-02-01,too_busy,Asked for pause,premium,ads

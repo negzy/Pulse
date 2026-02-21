@@ -1,0 +1,35 @@
+---
+description: Skool Pulse extension – internal tracking and Skool DOM
+globs: extension/**/*
+alwaysApply: false
+---
+
+# Skool Pulse Extension – Internal Tracking
+
+When changing **content.js** or **sidepanel.js** around "Your activity" (likes, comments, posts you made):
+
+## Source of truth
+
+- **Chrome storage** is the source of truth for today's personal activity. Key: `skoolPulse_personal_YYYY-M-D`.
+- Content script: on each like/comment/post, update **in-memory** `personalActivity` immediately, then **read storage → merge (max per field) → write** so counts persist across tabs/refreshes.
+- **Never** overwrite in-memory with storage after the user has already tracked something: use a `hasLocalUpdates` (or similar) flag so the initial `loadPersonalActivity()` callback does not replace counts that were just incremented.
+
+## Skool DOM – comment likes
+
+- **Comment like is not a `<button>`.** It is a div hierarchy: `TooltipWrapper` → `VotesLabelWrapper` → `VotesLabel` (the number).
+- Use **both** `click` and `mousedown` for like detection; use **`e.composedPath()`** (not only `e.target`) so clicks inside shadow DOM or nested nodes are still attributed to the vote control.
+- Match by **class substrings** (Skool uses styled-components): `VotesLabel`, `VotesLabelWrapper`, `TooltipWrapper`. Fallback: class fragments `1e3d9on` (VotesLabel), `q6lkdr` (TooltipWrapper). Also treat a **single numeric text node** inside a `[class*="Vote"]` container as a like control.
+- **Debounce per control** (e.g. WeakMap keyed by wrapper element), not by a string like `className + textContent`, or all comments showing "3" will share one debounce.
+
+## Side panel – "Your activity"
+
+- When the **active tab is Skool**: get stats via `chrome.tabs.sendMessage(tabId, { action: 'getStats' })`; content script merges in-memory with storage and returns today's totals.
+- When the **active tab is not Skool** (or sendMessage fails): side panel should still show today's totals by reading **chrome.storage.local** with the same today key (`skoolPulse_personal_YYYY-M-D`) so switching groups/tabs does not show 0.
+
+## Posts vs category
+
+- Only count as **post** when the clicked button has class containing **SubmitButton** (e.g. `SubmitButtonWrapper`). Skool's actual "Post" submit is `<button class="... SubmitButtonWrapper-sc-..."><span>Post</span></button>`. Category/filter buttons that say "Post" must not increment posts.
+
+## getStats response
+
+- Content script's getStats handler must be **async**: read from storage, merge with in-memory (max per field), then `sendResponse(...)`. Return `true` from the listener to keep the message channel open for the async response.

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Skool Pulse – Options</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 480px;
+      margin: 40px auto;
+      padding: 0 20px;
+      background: #0a0a0a;
+      color: #e5e5e5;
+    }
+    h1 { font-size: 20px; margin-bottom: 8px; }
+    p { color: #a3a3a3; font-size: 14px; margin-bottom: 20px; }
+    label { display: block; font-size: 13px; margin-bottom: 4px; color: #a3a3a3; }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 16px;
+      background: #141414;
+      border: 1px solid #262626;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px 20px;
+      background: #f97316;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { background: #ea580c; }
+    .saved { color: #22c55e; font-size: 13px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Skool Pulse Extension</h1>
+  <p>Enter your <strong>Pulse dashboard URL</strong> and <strong>extension token</strong> so the extension can sync activity.</p>
+
+  <div style="background:#1c1917; border:1px solid #44403c; border-radius:8px; padding:12px; margin-bottom:20px; font-size:13px;">
+    <p style="margin:0 0 8px; color:#f97316; font-weight:600;">Where is the Pulse dashboard?</p>
+    <p style="margin:0; color:#a8a29e;">The dashboard is at <strong>pulsewav.co</strong>. Log in, then in the top menu click <strong>Extension</strong> to get your token.</p>
+    <p style="margin:8px 0 0;"><a href="https://pulsewav.co" target="_blank" rel="noopener" style="color:#f97316;">Open dashboard →</a></p>
+  </div>
+
+  <label for="baseUrl">Pulse dashboard URL</label>
+  <input type="url" id="baseUrl" placeholder="https://pulsewav.co">
+  <label for="token">Extension token</label>
+  <input type="password" id="token" placeholder="Paste token from dashboard → Extension page">
+  <button id="save">Save</button>
+  <p id="saved" class="saved" style="display:none;">Saved.</p>
+  <p style="margin-top: 16px;"><a href="#" id="openScheduler" style="color: #f97316; font-size: 14px;">Open Scheduler</a> – preload and schedule posts per community.</p>
+  <hr style="border-color:#262626; margin: 24px 0;">
+  <h2 style="font-size: 16px; margin-bottom: 8px;">How to use</h2>
+  <ol style="color: #a3a3a3; font-size: 14px; line-height: 1.6; padding-left: 20px; margin: 0;">
+    <li>Open the <strong style="color:#e5e5e5">Pulse dashboard</strong> in your browser (URL above), log in, go to <strong style="color:#e5e5e5">Extension</strong> in the menu, and copy your token here.</li>
+    <li>Go to <strong style="color:#e5e5e5">skool.com</strong> and open one of your groups. Click the <strong style="color:#f97316">Skool Pulse</strong> icon → side panel opens.</li>
+    <li>Click <strong>Sync to Pulse</strong> in the panel to save today’s numbers to your dashboard.</li>
+  </ol>
+  <script src="options.js"></script>
+</body>
+</html>

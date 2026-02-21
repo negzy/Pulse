@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Skool Pulse</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0a0a0a;
+      color: #e5e5e5;
+      min-height: 100vh;
+    }
+    .header {
+      padding: 16px;
+      border-bottom: 1px solid #262626;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header h1 { margin: 0; font-size: 18px; font-weight: 700; color: #fff; }
+    .body { padding: 16px; }
+    .section-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #737373; margin: 0 0 8px; }
+    .today-date { font-size: 13px; color: #a3a3a3; margin: 0 0 12px; }
+    .totals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    .total-card {
+      padding: 12px;
+      background: #141414;
+      border: 1px solid #262626;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .total-card .num { font-size: 20px; font-weight: 700; color: #f97316; display: block; }
+    .total-card .label { font-size: 12px; color: #737373; }
+    .sync-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid #262626; }
+    .sync-section .group-name { font-size: 14px; color: #d6d6d6; margin-bottom: 8px; }
+    .btn {
+      width: 100%;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #000;
+      background: #f97316;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+    .btn:hover:not(:disabled) { background: #ea580c; }
+    .btn:disabled { opacity: 0.7; cursor: not-allowed; }
+    .btn-secondary { background: #262626; color: #e5e5e5; }
+    .btn-secondary:hover:not(:disabled) { background: #404040; }
+    .link { display: inline-block; font-size: 13px; color: #f97316; text-decoration: none; margin-top: 8px; }
+    .link:hover { text-decoration: underline; }
+    .hint { font-size: 12px; color: #737373; margin-top: 12px; }
+    .err { font-size: 13px; color: #f87171; margin-bottom: 12px; }
+    .tagline { font-size: 11px; color: #737373; margin-top: 2px; }
+    .banner { padding: 10px 12px; background: #292524; border: 1px solid #57534e; border-radius: 8px; font-size: 13px; margin-bottom: 12px; color: #d6d3d1; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
+    .modal { background: #1c1917; border: 1px solid #44403c; border-radius: 12px; padding: 20px; max-width: 320px; width: 100%; }
+    .modal h2 { margin: 0 0 8px; font-size: 18px; color: #fff; }
+    .modal p { margin: 0 0 16px; font-size: 14px; color: #a8a29e; }
+    .modal .btn { margin-bottom: 8px; }
+    .modal .btn-secondary { background: #44403c; color: #e7e5e4; }
+    .modal .btn-secondary:hover { background: #57534e; }
+    .tabs { display: flex; border-bottom: 1px solid #262626; padding: 0 16px; gap: 0; }
+    .tabs button { padding: 10px 14px; font-size: 13px; font-weight: 500; background: none; border: none; color: #737373; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+    .tabs button:hover { color: #e5e5e5; }
+    .tabs button.active { color: #f97316; border-bottom-color: #f97316; }
+    .panel { display: none; flex-direction: column; height: calc(100vh - 120px); min-height: 200px; }
+    .panel.active { display: flex; }
+    .panel-body { flex: 1; overflow: auto; }
+    #schedulerPanel { padding: 0; overflow: hidden; }
+    #schedulerFrame { width: 100%; height: 100%; min-height: 400px; border: none; background: #0a0a0a; }
+    .goals-hero { background: linear-gradient(135deg, #1c1917 0%, #292524 100%); border: 1px solid #44403c; border-radius: 12px; padding: 14px; margin: 0 0 14px; }
+    .goals-hero .hero-title { font-size: 14px; font-weight: 700; color: #fff; margin: 0 0 10px; }
+    .goals-progress-grid { display: grid; grid-template-columns: 1fr auto auto; gap: 10px 16px; align-items: center; font-size: 13px; }
+    .goals-progress-grid .label { color: #a3a3a3; }
+    .goals-progress-grid .value { font-weight: 600; color: #e5e5e5; text-align: right; }
+    .goals-progress-grid .done .value { color: #22c55e; }
+    .goals-progress-grid .pending .value { color: #f97316; }
+    .goals-progress-grid .tick { text-align: center; color: #22c55e; font-size: 16px; }
+    .streak-hero { background: linear-gradient(135deg, #1c1917 0%, #292524 100%); border: 1px solid #44403c; border-radius: 12px; padding: 14px; margin: 12px 0; }
+    .streak-hero .streak-fires { font-size: 24px; letter-spacing: 2px; margin: 8px 0; }
+    .confetti { position: fixed; pointer-events: none; z-index: 9999; left: 0; top: 0; right: 0; bottom: 0; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Check your community's PULSE</h1>
+  </div>
+  <div class="tabs">
+    <button type="button" id="tabPulse" class="active">Pulse</button>
+    <button type="button" id="tabScheduler">Scheduler</button>
+  </div>
+  <div id="pulsePanel" class="panel active">
+    <div id="atRiskBanner" class="banner body" style="display: none;">You haven’t completed today’s tasks yet. Keep your streak going.</div>
+    <div id="comebackModal" class="modal-overlay" style="display: none;">
+      <div class="modal">
+        <h2>Where did you go?</h2>
+        <p>What happened to us crushing our goals?</p>
+        <button type="button" id="comebackShowTasks" class="btn">I'm back — show today's tasks</button>
+        <button type="button" id="comebackReschedule" class="btn btn-secondary">Reschedule my tasks</button>
+        <button type="button" id="comebackSnooze" class="btn btn-secondary">Snooze (24h)</button>
+      </div>
+    </div>
+    <div class="body panel-body">
+      <p id="todayDate" class="today-date">Today</p>
+      <div id="todayTotals" class="totals-grid"></div>
+      <p id="todayError" class="err" style="display: none;"></p>
+      <div id="goalsSection" class="goals-hero">
+        <p class="hero-title">🎯 Your goals (Posts / Comments / Likes)</p>
+        <label class="hint" style="display: block; margin-bottom: 6px; font-size: 11px;">Goal set</label>
+        <select id="goalsPeriod" class="goals-select" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #0a0a0a; border: 1px solid #44403c; border-radius: 6px; color: #e5e5e5; font-size: 13px;">
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+          <div><label style="font-size: 11px; color: #737373;">Posts</label><input type="number" id="goalPosts" min="0" placeholder="0" style="width: 100%; padding: 8px; background: #0a0a0a; border: 1px solid #44403c; border-radius: 6px; color: #e5e5e5;" /></div>
+          <div><label style="font-size: 11px; color: #737373;">Comments</label><input type="number" id="goalComments" min="0" placeholder="0" style="width: 100%; padding: 8px; background: #0a0a0a; border: 1px solid #44403c; border-radius: 6px; color: #e5e5e5;" /></div>
+          <div><label style="font-size: 11px; color: #737373;">Likes</label><input type="number" id="goalLikes" min="0" placeholder="0" style="width: 100%; padding: 8px; background: #0a0a0a; border: 1px solid #44403c; border-radius: 6px; color: #e5e5e5;" /></div>
+        </div>
+        <div id="goalsProgress" class="goals-progress"></div>
+      </div>
+      <div id="streakSection" class="streak-hero">
+        <p class="hero-title">🔥 Hot streak</p>
+        <div id="streakFires" class="streak-fires"></div>
+        <p id="streakLabel" class="hint" style="font-size: 12px; margin: 0 0 8px;"></p>
+        <p class="hint" style="font-size: 11px; color: #737373; margin: 0;">Hit your <strong>daily</strong> goals 5 days in a row to max your streak. Miss 5 days in a row = detention until you complete today&apos;s goals.</p>
+        <div id="detentionBanner" class="banner" style="display: none; margin-top: 10px;">Complete today&apos;s goals to get out of detention.</div>
+      </div>
+      <p class="hint" style="margin: 12px 0 8px; font-size: 11px;">Save &amp; view your data</p>
+      <button type="button" id="syncBtn" class="btn">Sync to Pulse</button>
+      <a href="#" id="dashboardLink" class="link" target="_blank" rel="noopener">Open dashboard →</a>
+      <p class="hint" style="font-size: 10px; margin-top: 8px;">Set Pulse URL and token once in extension options.</p>
+    </div>
+    <div id="confettiContainer" class="confetti" aria-hidden="true"></div>
+  </div>
+  <div id="schedulerPanel" class="panel">
+    <iframe id="schedulerFrame" title="Scheduler"></iframe>
+  </div>
+  <script src="features/motivation/types.js"></script>
+  <script src="features/motivation/motivationStorage.js"></script>
+  <script src="features/motivation/motivationEngine.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>

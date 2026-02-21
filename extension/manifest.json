@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Skool Pulse",
+  "version": "1.0.0",
+  "description": "Track engagement in your Skool community. Side panel on skool.com with one-click sync.",
+  "permissions": ["storage", "activeTab", "sidePanel", "alarms", "clipboardRead"],
+  "background": { "service_worker": "background.js" },
+  "host_permissions": ["https://www.skool.com/*", "https://skool.com/*", "http://localhost:*/*", "https://*/*"],
+  "content_scripts": [{
+    "matches": ["https://www.skool.com/*", "https://skool.com/*"],
+    "js": ["content.js"],
+    "css": ["sidebar.css"],
+    "run_at": "document_idle"
+  }],
+  "action": {
+    "default_title": "Skool Pulse – open side panel",
+    "default_icon": { "16": "icons/icon16.png", "48": "icons/icon48.png" }
+  },
+  "side_panel": { "default_path": "sidepanel.html" },
+  "options_page": "options.html",
+  "icons": { "16": "icons/icon16.png", "48": "icons/icon48.png" }
+}

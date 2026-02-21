@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Scheduler – Skool Pulse</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; background: #0a0a0a; color: #e5e5e5; min-height: 100vh; padding: 12px; }
+    @media (max-width: 400px) { body { padding: 8px; } .section { padding-bottom: 16px; } }
+    h1 { font-size: 20px; margin: 0 0 8px; }
+    .tagline { font-size: 12px; color: #737373; margin-bottom: 16px; }
+    label { display: block; font-size: 13px; margin-bottom: 4px; color: #a3a3a3; }
+    select, input[type="text"], input[type="datetime-local"], textarea { width: 100%; padding: 8px 12px; margin-bottom: 12px; background: #141414; border: 1px solid #262626; border-radius: 8px; color: #fff; font-size: 14px; }
+    textarea { min-height: 80px; resize: vertical; }
+    .btn { padding: 10px 16px; font-size: 14px; font-weight: 600; color: #000; background: #f97316; border: none; border-radius: 8px; cursor: pointer; margin-right: 8px; margin-bottom: 8px; }
+    .btn:hover:not(:disabled) { background: #ea580c; }
+    .btn:disabled { opacity: 0.7; cursor: not-allowed; }
+    .btn-secondary { background: #44403c; color: #e7e5e4; }
+    .btn-secondary:hover { background: #57534e; }
+    .btn-danger { background: #991b1b; color: #fff; }
+    .err { font-size: 13px; color: #f87171; margin-bottom: 12px; }
+    .section { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid #262626; }
+    .row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { padding: 10px 12px; background: #141414; border: 1px solid #262626; border-radius: 8px; margin-bottom: 8px; font-size: 14px; }
+    li .meta { font-size: 12px; color: #737373; margin-top: 4px; }
+    .toggle { margin-bottom: 16px; }
+    .status { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+    .status.QUEUED, .status.SCHEDULED, .status.PAUSED { background: #44403c; }
+    .status.PUBLISHED { background: #166534; }
+    .status.FAILED { background: #991b1b; }
+  </style>
+</head>
+<body>
+  <h1>Scheduler</h1>
+  <p class="tagline">Check your community's PULSE – preload posts and schedule per community.</p>
+
+  <div class="section">
+    <div class="toggle">
+      <label><input type="checkbox" id="schedulerPaused" /> Pause scheduler (global)</label>
+    </div>
+    <p class="err" id="scheduleErr" style="display: none;"></p>
+    <div style="margin-bottom: 12px;">
+      <button type="button" id="scanGroupsBtn" class="btn btn-secondary" style="width: auto; margin-bottom: 8px;">🔍 Scan my Skool groups</button>
+      <p style="font-size: 12px; color: #737373; margin: 0;">Opens your Skool communities page and auto-scrolls to detect all groups you're in. Make sure you're logged into Skool first.</p>
+    </div>
+    <label>
+      <input type="radio" name="communityMode" id="modePulse" value="pulse" checked />
+      Pulse community
+    </label>
+    <label style="margin-left: 16px;">
+      <input type="radio" name="communityMode" id="modeSkool" value="skool" />
+      Skool group (auto-detected or manual)
+    </label>
+    <div id="pulseCommunitySection">
+      <label style="margin-top: 8px;">Community</label>
+      <select id="communitySelect"><option value="">— Select community —</option></select>
+    </div>
+    <div id="skoolGroupSection" style="display: none;">
+      <label style="margin-top: 8px;">Skool Group Slug</label>
+      <div style="display: flex; gap: 8px;">
+        <input type="text" id="skoolGroupSlug" placeholder="e.g. credit-hub, my-group" style="flex: 1;" />
+        <button type="button" id="detectGroupBtn" class="btn btn-secondary" style="white-space: nowrap; padding: 8px 12px;">Auto-detect</button>
+      </div>
+      <p style="font-size: 12px; color: #737373; margin-top: 4px;">Enter the group slug from the URL (skool.com/<strong>your-group-slug</strong>) or click Auto-detect if you have a Skool tab open.</p>
+    </div>
+    <label>Title (optional)</label>
+    <input type="text" id="postTitle" placeholder="Post title" />
+    <label>Body (required)</label>
+    <textarea id="postBody" placeholder="Post content" required></textarea>
+    <label>GIF URL (optional) — paste a Giphy link</label>
+    <input type="url" id="postGifUrl" placeholder="https://giphy.com/gifs/... or direct image URL" />
+    <p style="font-size: 12px; color: #737373; margin: -8px 0 12px;">Skool uses Giphy; paste a link from <a href="https://giphy.com" target="_blank" rel="noopener" style="color: #f97316;">giphy.com</a> and we'll include it in the post.</p>
+    <label>Date & time <span style="color:#737373;font-weight:normal;">(your local time) — only for scheduled</span></label>
+    <input type="datetime-local" id="scheduledAt" />
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+      <button type="button" id="postNowBtn" class="btn" style="background: #166534; margin-bottom: 0;">Post now</button>
+      <button type="button" id="addBtn" class="btn">Add to queue</button>
+      <button type="button" id="suggestTimeBtn" class="btn btn-secondary">Suggest next slot</button>
+    </div>
+    <p style="font-size: 12px; color: #737373; margin-top: 8px;">Use <strong>Post now</strong> to open Skool, fill the composer, and try to post immediately (no schedule). Then add scheduled posts once that works.</p>
+  </div>
+
+  <div class="section">
+    <h2 style="font-size: 16px; margin-bottom: 12px;">Queue by community</h2>
+    <div id="queueByCommunity"></div>
+  </div>
+
+  <div class="section">
+    <h2 style="font-size: 16px; margin-bottom: 12px;">All scheduled (by day)</h2>
+    <div id="globalList"></div>
+  </div>
+
+  <script src="features/scheduler/types.js"></script>
+  <script src="features/scheduler/schedulerValidation.js"></script>
+  <script src="features/scheduler/schedulerStorage.js"></script>
+  <script src="features/scheduler/schedulerService.js"></script>
+  <script src="scheduler.js"></script>
+</body>
+</html>

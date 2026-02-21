@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #fafafa;
+  --accent: #f97316;
+  --border: #262626;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Simple focus ring for accessibility */
+input:focus, button:focus, select:focus, textarea:focus {
+  @apply outline-none ring-2 ring-accent/50 ring-offset-2 ring-offset-background;
+}

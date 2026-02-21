@@ -1,0 +1,25 @@
+/* Skool Pulse – floating button on skool.com (opens side panel) */
+.skool-pulse-toggle-btn {
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  z-index: 2147483646;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 10px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f97316;
+  background: #0a0a0a;
+  border: 1px solid #262626;
+  border-right: 0;
+  border-radius: 8px 0 0 8px;
+  cursor: pointer;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+.skool-pulse-toggle-btn:hover {
+  background: #141414;
+  color: #ea580c;
+}
